@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "organization": "ehmo",
+  "date": "March 2026",
+  "abstract": "Go binary size reduction skill. Teaches agents to shrink Go binaries through structured, measured optimization: stripping, inlining control, CGO toggling, build-tag discovery, and dependency pruning. Tested against 14 trending Go repositories with an average 36.6% raw size reduction across all builds.",
+  "references": [
+    "https://pkg.go.dev/cmd/go",
+    "https://go.dev/src/cmd/link/doc.go",
+    "https://www.datadoghq.com/blog/engineering/agent-go-binaries/",
+    "https://tailscale.com/blog/macos-binary-size",
+    "https://tailscale.com/docs/how-to/set-up-small-tailscale"
+  ]
+}

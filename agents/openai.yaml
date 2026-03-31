@@ -1,0 +1,7 @@
+interface:
+  display_name: "Go Binary Size Reduction"
+  short_description: "Shrink Go binaries with measured tradeoffs."
+  default_prompt: "Use $golang-binary-size-reduction to reduce a Go binary safely and measure the real before/after impact."
+
+policy:
+  allow_implicit_invocation: true
