@@ -11,6 +11,7 @@ Shrink Go binaries with measured tradeoffs. Covers CLIs, daemons, libraries, plu
 | 1 | `-ldflags="-s -w"` (strip symbols/DWARF) | 25-35% | Weaker debugging |
 | 2 | `-gcflags=all=-l` (disable inlining) | 5-10% additional | Reduced runtime performance |
 | 3 | `CGO_ENABLED=0` + `-tags netgo,osusergo` | 0-6% | Behavior changes; can increase size |
+| 3b | `CGO_CFLAGS="-Oz"` (when CGO must stay on) | 1-2% | Slightly slower C code; no effect if no C source compiled |
 | 4 | Project-specific build tags | 0-15% | Feature removal |
 | 5 | Dependency pruning / embedded asset reduction | Varies | Source changes required |
 | 6 | `garble -tiny`, UPX, TinyGo | Varies | Specialist tradeoffs |

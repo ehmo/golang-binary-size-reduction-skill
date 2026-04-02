@@ -24,6 +24,7 @@ Use only after confirming the tradeoff is acceptable.
 | `-buildvcs=false` | provenance is captured elsewhere | <1% | weaker embedded provenance |
 | `-gcflags=all=-l` | performance regression from no inlining is acceptable | 5-10% additional | reduced runtime performance |
 | `CGO_ENABLED=0` | cgo is not required | 0-6% (varies) | behavior changes; can *increase* size for some projects |
+| `CGO_CFLAGS="-Oz"` | cgo must stay enabled and C source is compiled | 1-2% | slightly slower C code execution; zero effect if CGO only links system libraries |
 | `-tags netgo` | pure-Go DNS behavior is acceptable | <1% | resolver differences |
 | `-tags osusergo` | pure-Go user/group lookup is acceptable | <1% | user lookup differences |
 | project-specific tags | project has feature-gating tags (check Makefile/goreleaser) | 0-15% | feature removal |
@@ -45,6 +46,7 @@ Do not present these as standard production advice.
 | PGO as a size tactic | do not use | can increase binary size |
 | `-compressdwarf=false` as a shrink step | do not use | increases size; only for debugger compatibility |
 | `-ldflags="-buildid="` with `-s -w` | redundant | build ID is already stripped by `-s -w`; adds no additional savings |
+| `CC="zig cc"` as a size technique | do not use | zig cc does not reduce binary size; benchmarks show 0-0.8% *increase* on native builds; zig is a cross-compilation tool, not a size tool |
 
 ## Repo-Specific Tag Discovery
 
@@ -82,6 +84,7 @@ Ask whether it is actually required.
 If yes:
 
 - keep cgo on
+- if the project compiles C source code (e.g., `mattn/go-sqlite3` amalgamation), apply `CGO_CFLAGS="-Oz"` for 1-2% raw savings
 - focus on dependency and asset reduction
 
 If no:

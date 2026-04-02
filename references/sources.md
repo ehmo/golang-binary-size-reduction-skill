@@ -43,6 +43,36 @@ Use these sources to justify recommendations or resolve edge cases.
 - OneUptime: https://oneuptime.com/blog/post/2026-01-07-go-reduce-binary-size/view
   Useful as a current blog overview, but prefer primary sources for policy-level guidance.
 
+## CGO_CFLAGS and Zig cc Benchmarks
+
+Benchmarked April 2026 on darwin/arm64 with Go 1.26.1 and Zig 0.15.2.
+
+### CGO_CFLAGS="-Oz" (C source size optimization)
+
+| Project | C dep | Default stripped | -Oz stripped | Raw delta |
+|---------|-------|-----------------|--------------|-----------|
+| owncast | mattn/go-sqlite3 | 79,635,282 | 79,125,266 | -0.64% |
+| waveterm | mattn/go-sqlite3 | 24,111,858 | 23,601,826 | -2.11% |
+| authelia | mattn/go-sqlite3 | 46,306,946 | 45,796,946 | -1.10% |
+| wails | system frameworks | 24,599,282 | 24,599,282 | 0% |
+
+Savings are consistent (~500 KB) across mattn/go-sqlite3 projects because the SQLite amalgamation is the same C source. Zero effect when CGO only links system libraries.
+
+### CC="zig cc" (not a size technique)
+
+| Project | Default CC | zig cc | Raw delta |
+|---------|-----------|--------|-----------|
+| act (pure Go) | 29,315,106 | 29,315,106 | 0% |
+| owncast (sqlite3) | 79,635,282 | 79,797,794 | +0.20% |
+| waveterm (sqlite3) | 24,111,858 | 24,299,570 | +0.78% |
+| wails (system libs) | 24,599,282 | 24,599,282 | 0% |
+
+Zig cc does not reduce binary size. On native macOS, it is clang underneath with slightly different defaults. Its value is cross-compilation convenience (single toolchain for all targets), not size.
+
+- Zig cross-compilation overview: https://dev.to/kristoff/zig-makes-go-cross-compilation-just-work-29ho
+- Uber's hermetic_cc_toolchain: https://github.com/uber/hermetic_cc_toolchain
+- GoReleaser zig+cgo example: https://github.com/goreleaser/example-zig-cgo
+
 ## Supplied Skill Example
 
 - samber Go linter skill: https://github.com/samber/cc-skills-golang/blob/main/skills/golang-linter/SKILL.md

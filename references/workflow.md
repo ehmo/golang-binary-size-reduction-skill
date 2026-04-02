@@ -83,6 +83,14 @@ Check for cgo requirements before applying:
 
 Do not apply CGO=0 without netgo and osusergo — without these tags, the runtime may still try to use cgo-backed resolver or user lookup functions and fail.
 
+If CGO must stay enabled and the project compiles C source code (e.g., `mattn/go-sqlite3` amalgamation), apply `CGO_CFLAGS="-Oz"`:
+
+```bash
+CGO_ENABLED=1 CGO_CFLAGS="-Oz" go build -trimpath -ldflags="-s -w" -gcflags="all=-l" -o dist/app ./cmd/app
+```
+
+This optimizes the C compiler for size instead of speed. Benchmarked savings: ~500 KB / 1-2% raw on SQLite-based projects (owncast, waveterm, authelia). Has no effect when CGO only links system libraries without compiling C source (e.g., wails linking Cocoa/WebKit).
+
 ## Phase 5: Specialist Tracks
 
 Use only when the earlier phases are exhausted or the distribution model clearly supports them.

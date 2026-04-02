@@ -35,6 +35,12 @@ Run the smallest useful set of runtime checks for the target:
 - confirm the release process still has adequate crash-symbolization support
 - keep an unstripped companion artifact if the org needs postmortem debugging
 
+### After `CGO_CFLAGS="-Oz"`
+
+- verify C-code-intensive paths still meet performance requirements
+- this only affects C source compilation, not system library linking
+- safe for most projects since C code (e.g., SQLite) is rarely in the hot path
+
 ### After `CGO_ENABLED=0`, `netgo`, or `osusergo`
 
 - test DNS resolution behavior

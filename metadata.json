@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "organization": "ehmo",
   "date": "March 2026",
   "abstract": "Go binary size reduction skill. Teaches agents to shrink Go binaries through structured, measured optimization: stripping, inlining control, CGO toggling, build-tag discovery, and dependency pruning. Tested against 14 trending Go repositories with an average 36.6% raw size reduction across all builds.",

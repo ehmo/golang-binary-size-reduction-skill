@@ -15,6 +15,7 @@ Options:
   --buildmode <mode>       pass -buildmode
   --ldflags <flags>        append linker flags
   --gcflags <flags>        pass gcflags
+  --cgo-cflags <flags>     set CGO_CFLAGS (e.g., -Oz for size optimization)
   -- <extra args...>       extra go build args before the package
 EOF
 }
@@ -28,6 +29,7 @@ tags=""
 buildmode=""
 ldflags=""
 gcflags=""
+cgo_cflags=""
 extra_args=()
 
 while (($# > 0)); do
@@ -66,6 +68,10 @@ while (($# > 0)); do
       ;;
     --gcflags)
       gcflags="$2"
+      shift 2
+      ;;
+    --cgo-cflags)
+      cgo_cflags="$2"
       shift 2
       ;;
     --)
@@ -136,13 +142,24 @@ fi
 
 {
   printf 'CGO_ENABLED=%s\n' "$effective_cgo"
+  if [[ -n "$cgo_cflags" ]]; then
+    printf 'CGO_CFLAGS=%s\n' "$cgo_cflags"
+  fi
   printf 'command='
   printf '%q ' go "${go_args[@]}"
   printf '\n'
 } >&2
 
+build_env=()
 if [[ "$disable_cgo" -eq 1 ]]; then
-  CGO_ENABLED=0 go "${go_args[@]}"
+  build_env+=(CGO_ENABLED=0)
+fi
+if [[ -n "$cgo_cflags" ]]; then
+  build_env+=(CGO_CFLAGS="$cgo_cflags")
+fi
+
+if ((${#build_env[@]} > 0)); then
+  env "${build_env[@]}" go "${go_args[@]}"
 else
   go "${go_args[@]}"
 fi

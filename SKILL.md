@@ -31,6 +31,7 @@ Always return:
       Apply `-gcflags=all=-l` to disable inlining. This typically saves an additional 5-10 percentage points of raw size on top of stripping. The tradeoff is reduced runtime performance from no inlining. Acceptable for size-critical deployments; skip for latency-sensitive hot paths. Measure both.
    3. Runtime and platform reductions.
       Default to `CGO_ENABLED=0` with `-tags netgo,osusergo`. These three settings go together — always apply all three when disabling cgo. Check `go env CGO_ENABLED` and the dependency graph for cgo requirements before applying. If unsure, build with and without CGO=0 and compare sizes. CGO=0 can *increase* size for projects with large embedded C-backed dependencies (e.g., projects with many cloud SDK modules or C library bindings where the pure-Go replacement is larger). If the project's goreleaser or release config explicitly uses `CGO_ENABLED=1` or external linking (`-linkmode=external`), keep CGO enabled.
+      If CGO must stay enabled and the project compiles C source code (e.g., `mattn/go-sqlite3`), apply `CGO_CFLAGS="-Oz"` to optimize C code for size. This typically saves 1-2% raw size (~500 KB for SQLite-based projects). It has no effect when CGO only links system libraries without compiling C source.
    4. Repo-specific build tags.
       This step is critical and must not be skipped. Search these files for `-tags` flags:
       - `goreleaser.yaml` / `.goreleaser.yml`
@@ -75,6 +76,8 @@ Read [references/workflow.md](./references/workflow.md) for the full procedure.
 - If `plugin`, `reflect`, `text/template`, or `html/template` are present, expect dead-code elimination to be weaker.
 - Always check the project's release build configuration (goreleaser.yaml, Makefile, Dockerfile, CI) for existing build tags and flags. Projects often have feature-gating tags that remove large dependency subtrees.
 - If `CGO_ENABLED=0` increases binary size, the project links against C libraries that have smaller C implementations than their pure-Go replacements. Keep CGO enabled for these projects.
+- If CGO must stay enabled and C source is compiled, `CGO_CFLAGS="-Oz"` is a free 1-2% win. No effect when CGO only links system libs.
+- Using `zig cc` as CC does not reduce binary size. Zig is a cross-compilation convenience tool, not a size optimization. Benchmarks show 0-0.8% *increase* on native builds.
 
 ## Watchlist
 
