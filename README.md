@@ -9,11 +9,12 @@ Your agent collects build facts first, applies safe reductions in order of impac
 Your agent gets a structured workflow:
 
 1. Collect build context (Go version, CGO state, build tags, dependencies).
-2. Build and measure a reproducible baseline.
-3. Apply reductions one class at a time, measuring after each step.
-4. Report the before/after numbers and the tradeoffs.
+2. Run a `go/analysis` source audit across the project.
+3. Build and measure a reproducible baseline.
+4. Apply reductions one class at a time, measuring after each step.
+5. Report the before/after numbers and the tradeoffs.
 
-It includes shell scripts for reproducible measurement, a decision tree for edge cases, and hard rules that prevent the agent from recommending unsafe techniques.
+It includes a reusable Go analyzer, shell scripts for project-wide auditing and reproducible measurement, a decision tree for edge cases, and hard rules that prevent the agent from recommending unsafe techniques.
 
 ## Benchmark results
 
@@ -76,9 +77,10 @@ Audit this Go project for binary size reduction opportunities.
 Apply release stripping and measure the impact.
 ```
 
-Four bundled shell scripts produce consistent output across repos:
+Five bundled shell scripts produce consistent output across repos:
 
-- `scripts/collect-build-context.sh` -- gathers Go version, CGO state, dependencies, and watchlist hits
+- `scripts/collect-build-context.sh` -- gathers Go version, CGO state, dependencies, watchlist hits, and analyzer findings
+- `scripts/analyze-project.sh` -- runs the `binsize` analyzer over non-test files in `./...` or supplied package patterns
 - `scripts/reproducible-build.sh` -- builds with stable flags and paths
 - `scripts/measure-binary-size.sh` -- reports raw, gzip, and xz sizes plus top symbols
 - `scripts/compare-size-report.sh` -- diffs two artifacts with percentage changes
@@ -89,6 +91,11 @@ Four bundled shell scripts produce consistent output across repos:
 SKILL.md              -- Agent instructions with YAML frontmatter
 AGENTS.md             -- Quick context for agent consumption
 metadata.json         -- Version, references, abstract
+go.mod                -- Pinned analyzer dependencies
+analyzer/
+  analyzer.go         -- Reusable go/analysis Analyzer
+cmd/
+  gosizeaudit/        -- Standalone singlechecker driver
 references/
   build-inputs.md     -- Facts to collect before starting
   decision-tree.md    -- What to try, what to skip, what's forbidden
@@ -96,6 +103,7 @@ references/
   verification.md    -- How to validate the result
   sources.md          -- Authoritative references
 scripts/
+  analyze-project.sh
   collect-build-context.sh
   reproducible-build.sh
   measure-binary-size.sh

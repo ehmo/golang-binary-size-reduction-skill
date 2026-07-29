@@ -11,6 +11,7 @@ Use this workflow unless the repo already has a stricter release pipeline.
    `./scripts/reproducible-build.sh -o dist/app-baseline --pkg ./cmd/app`
 4. Measure it:
    `./scripts/measure-binary-size.sh dist/app-baseline`
+5. Review `source-size-analysis` in the collected context. The diagnostics identify audit leads in active and ignored Go files. They do not prove that code reaches the target binary or that removing it is safe.
 
 Do not change code or flags before you have a baseline.
 
@@ -44,13 +45,14 @@ If the win is large enough and the tradeoffs are acceptable, stop there.
 
 ## Phase 2b: Repo-Specific Tag Discovery
 
-Before structural changes, check the project's build infrastructure for existing feature-gating tags:
+Before structural changes, check the project's source and build infrastructure for existing feature-gating tags:
 
-1. Read `goreleaser.yaml`, `Makefile`, `Taskfile.yaml`, `Dockerfile`, and CI workflow files.
-2. Search for `-tags` flags in build commands.
-3. Search source for `//go:build` constraints that gate optional features.
-4. Common patterns: `WITHOUT_DOCKER`, `production`, `nodynamic`, `sqlite_omit_load_extension`.
-5. These tags can remove entire dependency subtrees, often producing 5-15% additional wins.
+1. Review the analyzer's `build-tag` findings for active and ignored Go files.
+2. Read `goreleaser.yaml`, `Makefile`, `Taskfile.yaml`, `Dockerfile`, and CI workflow files.
+3. Search for `-tags` flags in build commands.
+4. Search source for `//go:build` constraints if the analyzer could not load every shipped package.
+5. Common patterns: `WITHOUT_DOCKER`, `production`, `nodynamic`, `sqlite_omit_load_extension`.
+6. These tags can remove entire dependency subtrees, often producing 5-15% additional wins.
 
 ## Phase 3: Structural Reductions
 
@@ -58,11 +60,12 @@ If stripping and tags do not move size enough, inspect structure instead of reac
 
 Priorities:
 
-1. Remove unused direct imports from `main`.
-2. Move optional features behind build tags.
-3. Split heavyweight integrations into separate subcommands or binaries.
-4. Reduce or externalize embedded assets.
-5. Remove `timetzdata` unless the target truly needs embedded timezone data.
+1. Review `binsize` diagnostics for side-effect imports and packages that may retain runtime machinery.
+2. Remove unused direct imports from `main`.
+3. Move optional features behind build tags.
+4. Split heavyweight integrations into separate subcommands or binaries.
+5. Reduce or externalize embedded assets.
+6. Remove `timetzdata` unless the target truly needs embedded timezone data.
 
 This phase usually delivers the biggest durable wins for projects that accept source changes.
 

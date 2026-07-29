@@ -46,5 +46,7 @@ Collect these facts before proposing shrink work.
 ## Agent Notes
 
 - Prefer collecting facts with `./scripts/collect-build-context.sh`.
+- Review the collector's `source-size-analysis` section. It runs the `binsize` analyzer over `./...` and reports source locations for imports, build tags, cgo, and embedded payloads that need measurement.
+- If `./...` does not load cleanly, run `./scripts/analyze-project.sh <package-patterns...>` with the narrowest patterns that cover the shipped command.
 - If the build already uses tags or unusual env vars, preserve them during measurement.
 - If the release process signs binaries, perform any packing or patching analysis before signing, not after.

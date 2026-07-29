@@ -19,6 +19,7 @@ Always return:
 
 1. Collect build facts before changing anything.
    Run `./scripts/collect-build-context.sh [package]`.
+   The collector runs `./scripts/analyze-project.sh ./...` and includes non-test source findings under `source-size-analysis`. Exit status 3 means the analyzer completed and reported findings. Treat each finding as an audit lead, not proof that a change will reduce the target artifact.
    Read [references/build-inputs.md](./references/build-inputs.md).
 2. Build a reproducible baseline artifact.
    Run `./scripts/reproducible-build.sh -o <artifact> --pkg <package>`.
@@ -39,6 +40,7 @@ Always return:
       - `Dockerfile` / `docker-compose.yml`
       - `.github/workflows/*.yml`
       - `scripts/*.sh`
+      Start with the analyzer's `build-tag` findings for active and ignored Go files, then inspect the build configuration files because the analyzer cannot see tags supplied outside Go source.
       Also search Go source for build constraints: `grep -rn '//go:build' --include='*.go' | grep -v '_test.go' | head -40`.
       Look for tags that gate optional heavyweight features. Examples from real projects:
       - `WITHOUT_DOCKER` (nektos/act — removes Docker/Moby client, ~15% size win)
@@ -47,7 +49,7 @@ Always return:
       - `sqlite_omit_load_extension` (wavetermdev/waveterm — reduces SQLite surface)
       Apply any tag that disables optional features not needed for the build target.
    5. Structural reductions.
-      Remove accidental imports, split optional features into separate packages or commands, move heavyweight backends behind build tags, and shrink or externalize embedded assets.
+      Review analyzer findings for side-effect imports, reflection, templates, plugins, timezone data, and embedded assets. Remove accidental imports, split optional features into separate packages or commands, move heavyweight backends behind build tags, and shrink or externalize embedded assets.
    6. Specialist tracks.
       Evaluate `garble -tiny`, UPX, TinyGo, or architecture and packaging changes only after the earlier layers are measured. UPX does not work on macOS (binaries are killed by the OS due to code signing).
 5. Rebuild and remeasure after each step.
@@ -64,6 +66,7 @@ Read [references/workflow.md](./references/workflow.md) for the full procedure.
 - Never run UPX or any other packer after signing or notarization. UPX does not work on macOS at all (SIGKILL on execution).
 - Never disable cgo, switch resolver behavior, or add build tags without verifying the affected runtime behavior. Note that `CGO_ENABLED=0` can increase binary size for some projects.
 - Never declare success from raw bytes alone. Measure raw size, compressed size, and relevant runtime behavior.
+- Never treat a `binsize` diagnostic as a defect or an automatic edit. Confirm that the finding reaches the target binary, then measure the proposed change.
 - `-buildid=` in ldflags is redundant when `-s -w` is already applied.
 
 ## Fast Triage
@@ -103,6 +106,7 @@ Always inspect the dependency graph for:
 Prefer the bundled scripts when possible:
 
 - `./scripts/collect-build-context.sh`
+- `./scripts/analyze-project.sh ./...`
 - `./scripts/reproducible-build.sh`
 - `./scripts/measure-binary-size.sh`
 - `./scripts/compare-size-report.sh`

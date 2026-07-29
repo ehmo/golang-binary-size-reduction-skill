@@ -2,6 +2,7 @@
 set -euo pipefail
 
 pkg="${1:-.}"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 section() {
   printf '== %s ==\n' "$1"
@@ -33,3 +34,20 @@ if command -v rg >/dev/null 2>&1; then
 else
   grep -nE "$watchlist_pattern" "$tmp" || true
 fi
+
+section "source-size-analysis"
+printf 'pattern=./...\n'
+analysis_status=0
+"$script_dir/analyze-project.sh" ./... 2>&1 || analysis_status=$?
+case "$analysis_status" in
+  0)
+    printf 'result=no-findings\n'
+    ;;
+  3)
+    printf 'result=findings\n'
+    ;;
+  *)
+    printf 'result=failed\n'
+    ;;
+esac
+printf 'exit_status=%s\n' "$analysis_status"

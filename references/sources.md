@@ -6,6 +6,8 @@ Use these sources to justify recommendations or resolve edge cases.
 
 - Go build docs: https://pkg.go.dev/cmd/go
 - Go build constraints: https://pkg.go.dev/cmd/go
+- Go analysis framework: https://pkg.go.dev/golang.org/x/tools/go/analysis
+- Go single-analyzer driver: https://pkg.go.dev/golang.org/x/tools/go/analysis/singlechecker
 - Go linker docs: https://go.dev/src/cmd/link/doc.go
 - Go reproducible builds: https://go.dev/blog/rebuild
 - Go PGO docs: https://go.dev/doc/pgo

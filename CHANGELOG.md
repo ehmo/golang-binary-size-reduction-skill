@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.0 - 2026-07-29
+
+### Added
+
+- A reusable `analysis.Analyzer` that reports source patterns tied to binary-size work: custom build tags, cgo, embedded files, side-effect imports, reflection, templates, plugins, timezone data, resolver behavior, and user lookup.
+- The `gosizeaudit` command, backed by `golang.org/x/tools/go/analysis/singlechecker`.
+- `scripts/analyze-project.sh`, which builds the pinned analyzer outside the target module and runs it against non-test files in `./...` or supplied package patterns.
+- Analyzer tests based on `analysistest`, including active and ignored build constraints.
+
+### Changed
+
+- `scripts/collect-build-context.sh` now includes project-wide analyzer findings and distinguishes findings (exit 3) from analyzer failures without failing context collection.
+- The workflow now treats analyzer diagnostics as audit leads that require before-and-after builds and runtime checks.
+
 ## 1.1.0 — 2026-04-01
 
 ### Added

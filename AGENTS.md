@@ -2,7 +2,7 @@
 
 Shrink Go binaries with measured tradeoffs. Covers CLIs, daemons, libraries, plugins, Wasm, and packaged apps.
 
-**Reference:** https://pkg.go.dev/cmd/go
+**References:** https://pkg.go.dev/cmd/go and https://pkg.go.dev/golang.org/x/tools/go/analysis
 
 ## Technique priority
 
@@ -24,10 +24,14 @@ Shrink Go binaries with measured tradeoffs. Covers CLIs, daemons, libraries, plu
 - Never treat PGO as a size reduction technique
 - Always measure raw size, gzip size, and runtime behavior
 - Always collect build context before changing anything
+- Treat analyzer findings as audit leads, not automatic edits
 
 ## Scripts
 
 - `scripts/collect-build-context.sh` -- Gather build facts
+- `scripts/analyze-project.sh` -- Run source analysis across a Go project
 - `scripts/reproducible-build.sh` -- Build with stable flags
 - `scripts/measure-binary-size.sh` -- Measure artifact sizes
 - `scripts/compare-size-report.sh` -- Diff two artifacts
+
+`collect-build-context.sh` runs the analyzer over non-test files in `./...`. Analyzer exit status 3 means it completed and reported findings.
